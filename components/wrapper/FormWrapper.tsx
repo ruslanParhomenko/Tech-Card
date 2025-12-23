@@ -19,10 +19,12 @@ export function FormWrapper({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit || (() => {}))}
-        className={cn(className, "flex flex-col gap-4 p-6")}
+        className="flex flex-col w-full items-center"
         {...props}
       >
-        {children}
+        <div className={cn(className, "flex flex-col w-180 py-8 px-4")}>
+          {children}
+        </div>
       </form>
     </Form>
   );

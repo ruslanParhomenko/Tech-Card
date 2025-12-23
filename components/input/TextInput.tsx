@@ -32,9 +32,9 @@ export default function TextInput({
       control={control}
       name={fieldName}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="grid-cols-1 gap-4">
           <FormLabel>{fieldLabel}</FormLabel>
-          <FormControl className={cn(clasNameInput)}>
+          <FormControl className={cn(clasNameInput, "w-full")}>
             <Input
               placeholder={placeholder}
               {...field}
