@@ -2,9 +2,10 @@
 import { useEffect, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
-import { RefreshCcw } from "lucide-react";
+import { Plus, RefreshCcw } from "lucide-react";
 import SelectTabsByPatch from "./SelectTabsByPatch";
 import SelectByCategory from "./SelectByCategory";
+import { Button } from "../ui/button";
 
 export type PageNavType = {
   title: string;
@@ -58,6 +59,10 @@ export default function NavMenuHeader({
     setPatch("");
     setCategory("");
   };
+  const addNew = () => {
+    const url = patch === "cards" ? `/card` : `/product`;
+    router.push(url);
+  };
   return (
     <div className="md:p-4  sticky top-0 z-9 flex justify-center md:justify-start  gap-6">
       {navItems.length > 0 && (
@@ -77,12 +82,12 @@ export default function NavMenuHeader({
           isLoading={isPending}
         />
       )}
+      <button onClick={addNew} className="cursor-pointer w-24  px-2">
+        <Plus className="w-4 h-4" />
+      </button>
 
       {resetButton && (
-        <button
-          onClick={resetParams}
-          className="hover:text-black text-bl hover:bg-transparent cursor-pointer md:w-24 md:order-3 order-0 px-2"
-        >
+        <button onClick={resetParams} className="cursor-pointer w-24  px-2">
           <RefreshCcw className="w-4 h-4" />
         </button>
       )}
