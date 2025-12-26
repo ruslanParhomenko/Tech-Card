@@ -1,7 +1,10 @@
 import {
   getAllProducts,
   getProductByCategory,
+  ProductsGetData,
 } from "@/app/actions/products/products-actions";
+import { Product } from "@/app/generated/prisma/client";
+import ProductsTable from "@/features/products-table/ProductsTable";
 
 export default async function Page({
   searchParams,
@@ -14,9 +17,5 @@ export default async function Page({
     categoryProduct === "all"
       ? await getAllProducts()
       : await getProductByCategory(categoryProduct);
-  return (
-    <div>
-      <h1>{dataProduct.length}</h1>
-    </div>
-  );
+  return <ProductsTable data={dataProduct as ProductsGetData[]} />;
 }

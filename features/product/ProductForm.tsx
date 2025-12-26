@@ -5,13 +5,24 @@ import TextInput from "@/components/input/TextInput";
 import { FormWrapper } from "@/components/wrapper/FormWrapper";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { CATEGORY_PRODUCT, CATEGORY_UNIT } from "./constants";
+import { toast } from "sonner";
+import { productDefaultValues, productSchema, ProductType } from "./schema";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function ProductForm() {
-  const form = useForm();
+  const form = useForm<ProductType>({
+    resolver: zodResolver(productSchema),
+    defaultValues: productDefaultValues,
+    mode: "onChange",
+  });
 
   const onSubmit: SubmitHandler<any> = (data) => {
     createProduct(data);
-    form.reset();
+
+    toast.success("Продукт успешно создан");
+
+    form.reset(productDefaultValues);
   };
   return (
     <FormWrapper form={form} onSubmit={onSubmit} className="gap-8">

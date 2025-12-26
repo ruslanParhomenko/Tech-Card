@@ -44,6 +44,7 @@ export default function SelectInput({
           <FormLabel>{fieldLabel}</FormLabel>
           <FormControl className={cn(clasNameSelect, "w-full")}>
             <Select
+              key={field.value ?? "empty"}
               onValueChange={field.onChange}
               value={field.value}
               disabled={disabled}

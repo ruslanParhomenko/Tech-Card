@@ -1,6 +1,9 @@
 "use server";
+import { ProductType } from "@/features/product/schema";
 import prisma from "@/lib/prisma";
 import { unstable_cache, updateTag } from "next/cache";
+
+export type ProductsGetData = ProductType;
 
 // create
 export async function createProduct(data: {
@@ -34,7 +37,7 @@ export async function updateProduct(
 // get all
 export async function _getAllProducts() {
   return await prisma.product.findMany({
-    include: { recipeItems: true },
+    // recipeItems не включаем
   });
 }
 
@@ -50,13 +53,13 @@ export async function getProductById(id: number) {
     include: { recipeItems: true },
   });
 }
-//get by category
 export async function _getProductByCategory(category: string) {
   return await prisma.product.findMany({
     where: { category },
-    include: { recipeItems: true },
+    // recipeItems не включаем
   });
 }
+
 export const getProductByCategory = unstable_cache(
   _getProductByCategory,
   ["products"],
