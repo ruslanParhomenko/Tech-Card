@@ -1,7 +1,6 @@
 import { useFormContext } from "react-hook-form";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,16 +22,16 @@ export default function SelectInput({
   fieldLabel,
   placeholder,
   disabled = false,
-  description,
   clasNameSelect,
+  onValueChange,
 }: {
   options: { value: string; label: string }[];
   fieldName: string;
   fieldLabel?: string;
   placeholder?: string;
   disabled?: boolean;
-  description?: string;
   clasNameSelect?: string;
+  onValueChange?: (value: string) => void;
 }) {
   const { control } = useFormContext();
   return (
@@ -41,29 +40,38 @@ export default function SelectInput({
       name={fieldName}
       render={({ field, fieldState }) => (
         <FormItem className="grid-cols-1 gap-4">
-          <FormLabel>{fieldLabel}</FormLabel>
-          <FormControl className={cn(clasNameSelect, "w-full")}>
-            <Select
-              key={field.value ?? "empty"}
-              onValueChange={field.onChange}
-              value={field.value}
-              disabled={disabled}
-            >
-              <SelectTrigger className="w-full">
+          {fieldLabel && <FormLabel>{fieldLabel}</FormLabel>}
+          <Select
+            key={field.value ?? "empty"}
+            onValueChange={(value) => {
+              field.onChange(value);
+              onValueChange?.(value);
+            }}
+            value={field.value}
+            disabled={disabled}
+          >
+            <FormControl className={cn(clasNameSelect, "w-full")}>
+              <SelectTrigger
+                data-placeholder=""
+                className={cn(
+                  fieldLabel
+                    ? "w-full"
+                    : "[&_svg]:hidden h-6! border-none bg-transparent shadow-none"
+                )}
+              >
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {options.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </FormControl>
-          <FormDescription>{description}</FormDescription>
+            </FormControl>
+            <SelectContent>
+              <SelectGroup>
+                {options.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           <FormMessage>{fieldState?.error?.message}</FormMessage>
         </FormItem>
       )}

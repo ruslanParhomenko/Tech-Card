@@ -8,16 +8,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ProductsGetData } from "@/app/actions/products/products-actions";
+import {
+  deleteProduct,
+  ProductsGetData,
+} from "@/app/actions/products/products-actions";
 import { CATEGORY_PRODUCT, CATEGORY_UNIT } from "../product/constants";
+import { PenBoxIcon, Trash2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface ProductsTableProps {
   data: ProductsGetData[];
 }
 
 export default function ProductsTable({ data }: ProductsTableProps) {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const isDisabled = session?.user?.role !== "ADMIN";
   return (
-    <div className="overflow-x-auto">
+    <div className="w-full">
       <Table>
         <TableHeader>
           <TableRow>
@@ -27,6 +37,8 @@ export default function ProductsTable({ data }: ProductsTableProps) {
             <TableHead>единица</TableHead>
             <TableHead>категория</TableHead>
             <TableHead>ключ</TableHead>
+            <TableHead></TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -45,6 +57,14 @@ export default function ProductsTable({ data }: ProductsTableProps) {
                 }
               </TableCell>
               <TableCell>{product.key || "-"}</TableCell>
+              <TableCell onClick={() => router.push(`/product/${product.id}`)}>
+                <PenBoxIcon className="w-4 h-4 text-blue-700 cursor-pointer" />
+              </TableCell>
+              <TableCell
+                onClick={() => !isDisabled && deleteProduct(+product.id!)}
+              >
+                <Trash2Icon className="w-4 h-4 text-red-700 cursor-pointer" />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

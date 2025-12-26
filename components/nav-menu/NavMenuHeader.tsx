@@ -67,7 +67,7 @@ export default function NavMenuHeader({
     router.push(url);
   };
   return (
-    <div className="md:p-4  sticky top-0 z-9 flex justify-center md:justify-start  gap-6">
+    <div className="pb-4  sticky top-4 z-9 flex justify-between gap-6 w-full">
       {navItems.length > 0 && (
         <SelectTabsByPatch
           patch={patch}
@@ -94,7 +94,7 @@ export default function NavMenuHeader({
           isLoading={isPending}
         />
       )}
-      <button onClick={addNew} className="cursor-pointer w-12  px-2">
+      <button onClick={addNew} className="cursor-pointer w-12  px-2 ">
         <Plus className="w-4 h-4" />
       </button>
 

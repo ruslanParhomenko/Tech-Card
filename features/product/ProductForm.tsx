@@ -1,5 +1,8 @@
 "use client";
-import { createProduct } from "@/app/actions/products/products-actions";
+import {
+  createProduct,
+  updateProduct,
+} from "@/app/actions/products/products-actions";
 import SelectInput from "@/components/input/SelectInput";
 import TextInput from "@/components/input/TextInput";
 import { FormWrapper } from "@/components/wrapper/FormWrapper";
@@ -9,8 +12,10 @@ import { toast } from "sonner";
 import { productDefaultValues, productSchema, ProductType } from "./schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 
-export default function ProductForm() {
+export default function ProductForm({ data }: { data?: ProductType }) {
+  const id = data?.id;
   const form = useForm<ProductType>({
     resolver: zodResolver(productSchema),
     defaultValues: productDefaultValues,
@@ -18,12 +23,21 @@ export default function ProductForm() {
   });
 
   const onSubmit: SubmitHandler<any> = (data) => {
-    createProduct(data);
-
-    toast.success("Продукт успешно создан");
+    if (!id) {
+      createProduct(data);
+      toast.success("Продукт успешно создан");
+    } else {
+      updateProduct(id, data);
+      toast.success("Продукт успешно обновлен");
+    }
 
     form.reset(productDefaultValues);
   };
+
+  useEffect(() => {
+    if (!data) return;
+    form.reset(data);
+  }, [data]);
   return (
     <FormWrapper form={form} onSubmit={onSubmit} className="gap-8">
       <TextInput fieldLabel="продукт" fieldName="name" />

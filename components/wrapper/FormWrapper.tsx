@@ -18,12 +18,8 @@ export function FormWrapper({
 }) {
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit || (() => {}))}
-        className="flex flex-col w-full items-center h-[90vh] justify-center"
-        {...props}
-      >
-        <div className={cn(className, "flex flex-col w-150 py-8 px-4 ")}>
+      <form onSubmit={form.handleSubmit(onSubmit || (() => {}))} {...props}>
+        <div className={cn(className, "flex flex-col w-full py-8 px-4 ")}>
           {children}
           <SaveExitButton />
         </div>

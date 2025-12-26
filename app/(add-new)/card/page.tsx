@@ -1,5 +1,9 @@
+import { getAllProducts } from "@/app/actions/products/products-actions";
 import CardForm from "@/features/card/CardForm";
+import { ProductType } from "@/features/product/schema";
 
 export default async function Page() {
-  return <CardForm />;
+  const dataProduct = await getAllProducts();
+
+  return <CardForm dataProduct={dataProduct as ProductType[]} />;
 }

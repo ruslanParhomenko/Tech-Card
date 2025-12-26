@@ -27,10 +27,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col w-full items-center h-screen `}
       >
-        <Toaster position="top-center" />
-        <SessionProviders>{children}</SessionProviders>
+        <div className="w-180">
+          <Toaster position="top-center" />
+          <SessionProviders>{children}</SessionProviders>
+        </div>
       </body>
     </html>
   );

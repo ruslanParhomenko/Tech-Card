@@ -18,6 +18,7 @@ export default function TextInput({
   description,
   clasNameInput,
   type = "text",
+  orientation = "horizontal",
 }: {
   fieldName: string;
   fieldLabel?: string;
@@ -26,6 +27,7 @@ export default function TextInput({
   description?: string;
   clasNameInput?: string;
   type?: string;
+  orientation?: "horizontal" | "vertical";
 }) {
   const { control } = useFormContext();
 
@@ -34,7 +36,13 @@ export default function TextInput({
       control={control}
       name={fieldName}
       render={({ field }) => (
-        <FormItem className="grid-cols-1 gap-4">
+        <FormItem
+          className={cn(
+            orientation === "horizontal"
+              ? "grid-cols-1 gap-4"
+              : "grid-cols-2 items-end gap-2"
+          )}
+        >
           <FormLabel>{fieldLabel}</FormLabel>
           <FormControl className={cn(clasNameInput, "w-full")}>
             <Input
