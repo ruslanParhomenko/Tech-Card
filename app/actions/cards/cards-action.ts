@@ -1,6 +1,10 @@
 "use server";
 
+import { CalculationCardType } from "@/features/card/schema";
 import prisma from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
+
+export type CardsGetData = CalculationCardType;
 
 export async function createCard(data: {
   cardId: string;
@@ -10,12 +14,13 @@ export async function createCard(data: {
   weight: string;
   expirationPeriod: string;
   description?: string;
+  portion: string;
   recipe?: {
     name: string;
     quantity: string;
     coefficient: string;
     unit: string;
-    productId?: number;
+    productId?: string;
   }[];
 }) {
   return await prisma.calculationCard.create({
@@ -26,9 +31,18 @@ export async function createCard(data: {
       category: data.category,
       weight: data.weight,
       expirationPeriod: data.expirationPeriod,
+      portion: data.portion,
       description: data.description || "",
       recipe: data.recipe
-        ? { create: data.recipe.map((r) => ({ ...r })) }
+        ? {
+            create: data.recipe.map((r) => ({
+              name: r.name,
+              quantity: r.quantity,
+              coefficient: r.coefficient,
+              unit: r.unit,
+              productId: r.productId ? Number(r.productId) : undefined,
+            })),
+          }
         : undefined,
     },
     include: { recipe: true },
@@ -74,11 +88,19 @@ export async function updateCard(
   });
 }
 
-export async function getAllCards() {
+// get all
+export async function _getAllCards() {
   return await prisma.calculationCard.findMany({
     include: { recipe: true },
   });
 }
+
+export const getAllCards = unstable_cache(_getAllCards, ["cards"], {
+  revalidate: false,
+  tags: ["cards"],
+});
+
+// get by id
 
 export async function getCardById(id: number) {
   return await prisma.calculationCard.findUnique({
@@ -87,12 +109,33 @@ export async function getCardById(id: number) {
   });
 }
 
-export async function getCardsByProduct(productId: number) {
+// get by product
+export async function _getCardsByProduct(productId: number) {
   return await prisma.calculationCard.findMany({
     where: { recipe: { some: { productId } } },
     include: { recipe: true },
   });
 }
+export const getCardsByProduct = unstable_cache(_getCardsByProduct, ["cards"], {
+  revalidate: false,
+  tags: ["cards"],
+});
+
+// get by category
+export async function _getCardsByCategory(category: string) {
+  return await prisma.calculationCard.findMany({
+    where: { category },
+    include: { recipe: true },
+  });
+}
+export const getCardsByCategory = unstable_cache(
+  _getCardsByCategory,
+  ["cards"],
+  {
+    revalidate: false,
+    tags: ["cards"],
+  }
+);
 
 export async function deleteCard(id: number) {
   return await prisma.calculationCard.delete({

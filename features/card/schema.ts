@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Схема для RecipeItem
 export const recipeItemSchema = z.object({
   name: z.string().default(""),
   quantity: z
@@ -12,19 +11,19 @@ export const recipeItemSchema = z.object({
     .regex(/^\d+(\.\d+)?$/, "Коэффициент должен содержать только цифры и точку")
     .default("1"),
   unit: z.string().default(""),
+  productId: z.string().default(""),
 });
 
-// Дефолтные значения для RecipeItem
 export const recipeItemDefaultValues = {
   name: "",
   quantity: "0",
   coefficient: "1",
   unit: "",
+  productId: "",
 };
 
-// Схема для CalculationCard
 export const calculationCardSchema = z.object({
-  portion: z.number().optional().default(0),
+  portion: z.string().optional().default("1"),
   cardId: z
     .string()
     .regex(/^\d+$/, "CardId должен содержать только цифры")
@@ -37,9 +36,9 @@ export const calculationCardSchema = z.object({
 
   weight: z
     .string()
-    .regex(/^\d+(\.\d+)?$/, "Вес должен содержать только цифры и точку")
+    .regex(/^\d+(\/\d+)*$/, "Вес должен содержать только цифры и символ /")
     .optional()
-    .default("0"),
+    .default(""),
 
   expirationPeriod: z.string().optional().default(""),
   description: z.string().optional().default(""),
@@ -47,19 +46,27 @@ export const calculationCardSchema = z.object({
   recipe: z.array(recipeItemSchema).optional().default([]),
 });
 
-// Дефолтные значения для CalculationCard
 export const calculationCardDefaultValues = {
   cardId: "",
   name: "",
   unit: "",
   category: "",
-  weight: "0",
+  weight: "",
   expirationPeriod: "",
   description: "",
-  recipe: [],
+  portion: "1",
+
+  recipe: [
+    {
+      name: "",
+      quantity: "",
+      coefficient: "1",
+      unit: "",
+      productId: "",
+    },
+  ],
 };
 
-// Типы TypeScript
 export type RecipeItemType = z.infer<typeof recipeItemSchema>;
 
 export type CalculationCardType = z.output<typeof calculationCardSchema>;

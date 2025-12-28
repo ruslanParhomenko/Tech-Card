@@ -16,7 +16,7 @@ export default function TextInput({
   placeholder,
   disabled = false,
   description,
-  clasNameInput,
+  classNameInput,
   type = "text",
   orientation = "horizontal",
 }: {
@@ -25,7 +25,7 @@ export default function TextInput({
   placeholder?: string;
   disabled?: boolean;
   description?: string;
-  clasNameInput?: string;
+  classNameInput?: string;
   type?: string;
   orientation?: "horizontal" | "vertical";
 }) {
@@ -44,7 +44,7 @@ export default function TextInput({
           )}
         >
           <FormLabel>{fieldLabel}</FormLabel>
-          <FormControl className={cn(clasNameInput, "w-full")}>
+          <FormControl className={cn(classNameInput, "w-full")}>
             <Input
               placeholder={placeholder}
               {...field}

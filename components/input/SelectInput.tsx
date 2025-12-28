@@ -22,16 +22,18 @@ export default function SelectInput({
   fieldLabel,
   placeholder,
   disabled = false,
-  clasNameSelect,
+  classNameSelect,
   onValueChange,
+  orientation = "vertical",
 }: {
   options: { value: string; label: string }[];
   fieldName: string;
   fieldLabel?: string;
   placeholder?: string;
   disabled?: boolean;
-  clasNameSelect?: string;
+  classNameSelect?: string;
   onValueChange?: (value: string) => void;
+  orientation?: "horizontal" | "vertical";
 }) {
   const { control } = useFormContext();
   return (
@@ -39,7 +41,11 @@ export default function SelectInput({
       control={control}
       name={fieldName}
       render={({ field, fieldState }) => (
-        <FormItem className="grid-cols-1 gap-4">
+        <FormItem
+          className={cn(
+            orientation === "horizontal" ? "grid-cols-2" : "grid-cols-1 gap-4"
+          )}
+        >
           {fieldLabel && <FormLabel>{fieldLabel}</FormLabel>}
           <Select
             key={field.value ?? "empty"}
@@ -50,7 +56,7 @@ export default function SelectInput({
             value={field.value}
             disabled={disabled}
           >
-            <FormControl className={cn(clasNameSelect, "w-full")}>
+            <FormControl className={cn(classNameSelect, "w-full")}>
               <SelectTrigger
                 data-placeholder=""
                 className={cn(

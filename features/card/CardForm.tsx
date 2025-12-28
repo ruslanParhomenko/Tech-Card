@@ -31,14 +31,20 @@ import {
   calculationCardDefaultValues,
   CalculationCardFormValues,
   calculationCardSchema,
+  CalculationCardType,
 } from "./schema";
 import { ProductType } from "../product/schema";
+import { useLocalStorageForm } from "@/hooks/use-local-storage";
+import { CATEGORY } from "@/components/nav-menu/SelectByCategory";
+import { createCard } from "@/app/actions/cards/cards-action";
 
 export default function CardForm({
   dataProduct,
 }: {
   dataProduct: ProductType[];
 }) {
+  const STORAGE_KEY = "add-card";
+
   const [dataOptions, setDataOptions] = useState<
     { label: string; value: string }[]
   >([]);
@@ -48,6 +54,8 @@ export default function CardForm({
     defaultValues: calculationCardDefaultValues,
     mode: "onBlur",
   });
+
+  const { isLoaded } = useLocalStorageForm(form, STORAGE_KEY);
 
   const portion =
     useWatch({
@@ -73,14 +81,14 @@ export default function CardForm({
     let totalNeto_2 = 0;
 
     const values = recipe.map((r) => {
-      const product = dataProduct.find((p) => p.id?.toString() === r?.name);
+      const product = dataProduct.find((p) => p.id?.toString() === r.productId);
 
-      const weight = Number(r?.quantity || 0);
+      const weight = Number(r.quantity || 0);
       const coefficient = Number(product?.coefficient || 1);
 
       const neto = weight * coefficient;
-      const bruto2 = weight * portion;
-      const neto2 = weight * portion * coefficient;
+      const bruto2 = weight * +portion;
+      const neto2 = weight * +portion * coefficient;
 
       totalBruto += weight;
       totalNeto += neto;
@@ -96,8 +104,9 @@ export default function CardForm({
     };
   }, [recipe, portion, dataProduct]);
 
-  const onSubmit: SubmitHandler<CalculationCardFormValues> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<CalculationCardType> = async (data) => {
+    console.log("SUBMIT RESULT", data);
+    await createCard(data);
   };
 
   useEffect(() => {
@@ -106,44 +115,55 @@ export default function CardForm({
     setDataOptions(
       dataProduct.map((item) => ({
         label: item.name,
-        value: item.id?.toString() ?? "",
+        value: item.id?.toString() || "",
       }))
     );
   }, [dataProduct]);
 
-  useEffect(() => {
-    if (RecipeArray.fields.length === 0) {
-      RecipeArray.append({
-        name: "",
-        unit: "",
-        quantity: "",
-      });
-    }
-  }, [RecipeArray.fields.length, RecipeArray]);
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-screen w-full">
+        ...loading
+      </div>
+    );
+  }
 
   return (
     <FormWrapper form={form} onSubmit={onSubmit}>
       <div>
-        {" "}
-        <NumericInput
-          fieldLabel="Технологическая карта:"
-          fieldName="cardId"
-        />{" "}
+        <NumericInput fieldLabel="Технологическая карта:" fieldName="cardId" />
+
+        <SelectInput
+          fieldLabel="Категория продукта:"
+          fieldName="category"
+          orientation="horizontal"
+          options={CATEGORY}
+          classNameSelect="border-0"
+        />
+
         <TextInput
           fieldLabel="Наименование продукта:"
           fieldName="name"
           orientation="vertical"
-          clasNameInput="h-8! border-0 shadow-none border-b rounded-none"
-        />{" "}
+          classNameInput="h-8! border-0 shadow-none border-b rounded-none"
+        />
+
         <TextInput
           fieldLabel="Срок хранения:"
           fieldName="expirationPeriod"
           orientation="vertical"
-          clasNameInput="h-8! border-0 shadow-none border-b rounded-none"
-        />{" "}
+          classNameInput="h-8! border-0 shadow-none border-b rounded-none"
+        />
+
+        <TextInput
+          fieldLabel="Вес:"
+          fieldName="weight"
+          orientation="vertical"
+          classNameInput="h-8! border-0 shadow-none border-b rounded-none"
+        />
       </div>
 
-      <Table className="mb-4">
+      <Table className="my-6">
         <TableHeader>
           <TableRow>
             <TableHead colSpan={3}></TableHead>
@@ -163,14 +183,14 @@ export default function CardForm({
           </TableRow>
 
           <TableRow>
-            <TableHead className="w-6 border-r"></TableHead>
+            <TableHead className="w-10 border-r"></TableHead>
             <TableHead>продукт</TableHead>
-            <TableHead className="text-start w-12 border-x">ед</TableHead>
-            <TableHead className="text-center border-x w-20">брутто</TableHead>
-            <TableHead className="text-center border-x w-20">нетто</TableHead>
-            <TableHead className="text-center border-x w-20">брутто</TableHead>
-            <TableHead className="text-center border-x w-20">нетто</TableHead>
-            <TableHead className="text-center w-18"></TableHead>
+            <TableHead className="border-x w-16">ед</TableHead>
+            <TableHead className="border-x w-30 text-center">брутто</TableHead>
+            <TableHead className="border-x w-30 text-center">нетто</TableHead>
+            <TableHead className="border-x w-30 text-center">брутто</TableHead>
+            <TableHead className="border-x w-30 text-center">нетто</TableHead>
+            <TableHead className="w-18" />
           </TableRow>
         </TableHeader>
 
@@ -180,20 +200,22 @@ export default function CardForm({
               computedValues.values[idx] || {};
 
             const isLast = idx === RecipeArray.fields.length - 1;
+            const isOnlyOne = RecipeArray.fields.length === 1;
 
             return (
               <TableRow key={field.id}>
-                <TableCell className="p-1 border-r">{idx + 1}</TableCell>
+                <TableCell className="border-r">{idx + 1}</TableCell>
 
                 <TableCell className="p-0">
                   <SelectInput
                     options={dataOptions}
-                    fieldName={`recipe.${idx}.name`}
+                    fieldName={`recipe.${idx}.productId`}
                     onValueChange={(value) => {
                       const product = dataProduct.find(
                         (item) => item.id?.toString() === value
                       );
 
+                      form.setValue(`recipe.${idx}.name`, product?.name ?? "");
                       form.setValue(`recipe.${idx}.unit`, product?.unit ?? "");
                     }}
                   />
@@ -209,27 +231,37 @@ export default function CardForm({
                 <TableCell className="border-x p-0">
                   <NumericInput
                     fieldName={`recipe.${idx}.quantity`}
-                    className="border-0 shadow-none rounded-none w-full h-full"
+                    className="border-0 shadow-none rounded-none w-full"
                   />
                 </TableCell>
 
                 <TableCell className="border-x text-center">
-                  {product && neto?.toFixed(2)}
+                  {product && neto?.toFixed(4)}
                 </TableCell>
 
                 <TableCell className="border-x text-center">
-                  {product && bruto2?.toFixed(2)}
+                  {product && bruto2?.toFixed(4)}
                 </TableCell>
 
-                <TableCell className="text-center border">
-                  {product && neto2?.toFixed(2)}
+                <TableCell className="border-x text-center">
+                  {product && neto2?.toFixed(4)}
                 </TableCell>
 
                 <TableCell className="text-end">
                   <div className="flex justify-between gap-2">
                     <Trash2Icon
                       className="cursor-pointer w-4 h-4 text-red-700"
-                      onClick={() => RecipeArray.remove(idx)}
+                      onClick={() =>
+                        isOnlyOne
+                          ? RecipeArray.replace({
+                              productId: "",
+                              name: "",
+                              unit: "",
+                              quantity: "",
+                              coefficient: "1",
+                            })
+                          : RecipeArray.remove(idx)
+                      }
                     />
 
                     {isLast && (
@@ -237,9 +269,11 @@ export default function CardForm({
                         className="cursor-pointer w-4 h-4 text-green-700"
                         onClick={() =>
                           RecipeArray.append({
+                            productId: "",
                             name: "",
                             unit: "",
                             quantity: "",
+                            coefficient: "1",
                           })
                         }
                       />
@@ -272,13 +306,6 @@ export default function CardForm({
       <Textarea
         className="my-4 resize-none"
         {...form.register("description")}
-      />
-      <TextInput
-        fieldLabel="Старший повар:"
-        fieldName="key"
-        orientation="vertical"
-        clasNameInput=" border-0 shadow-none border-b rounded-none my-3"
-        disabled
       />
     </FormWrapper>
   );
