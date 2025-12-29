@@ -13,9 +13,21 @@ export async function createProduct(data: {
   category: string;
   key?: string;
 }) {
-  const dat = await prisma.product.create({ data });
+  if (data.key) {
+    const exists = await prisma.product.findUnique({
+      where: { key: data.key },
+      select: { id: true },
+    });
+
+    if (exists) {
+      throw new Error("KEY_EXISTS");
+    }
+  }
+
+  const product = await prisma.product.create({ data });
   updateTag("products");
-  return dat.id;
+
+  return product.id;
 }
 
 // update
@@ -28,10 +40,13 @@ export async function updateProduct(
     productId?: number;
   }
 ) {
-  return await prisma.product.update({
+  const product = await prisma.product.update({
     where: { id },
     data,
   });
+  updateTag("products");
+
+  return product.id;
 }
 
 // get all
@@ -70,7 +85,9 @@ export const getProductByCategory = unstable_cache(
 );
 
 export async function deleteProduct(id: number) {
-  return await prisma.product.delete({
+  const product = await prisma.product.delete({
     where: { id },
   });
+  updateTag("products");
+  return product.id;
 }

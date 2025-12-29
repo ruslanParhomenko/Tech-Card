@@ -22,16 +22,31 @@ export default function ProductForm({ data }: { data?: ProductType }) {
     mode: "onChange",
   });
 
-  const onSubmit: SubmitHandler<any> = (data) => {
-    if (!id) {
-      createProduct(data);
-      toast.success("Продукт успешно создан");
-    } else {
-      updateProduct(id, data);
-      toast.success("Продукт успешно обновлен");
-    }
+  const onSubmit: SubmitHandler<any> = async (data) => {
+    try {
+      if (!id) {
+        await createProduct(data);
+        toast.success("Продукт успешно создан");
+      } else {
+        await updateProduct(id, data);
+        toast.success("Продукт успешно обновлен");
+      }
 
-    form.reset(productDefaultValues);
+      form.reset(productDefaultValues);
+    } catch (error) {
+      if (error instanceof Error && error.message === "KEY_EXISTS") {
+        toast.error("Продукт с таким key уже существует");
+
+        form.setError("key", {
+          type: "manual",
+          message: "Такой key уже используется",
+        });
+
+        return;
+      }
+
+      toast.error("Ошибка сохранения продукта");
+    }
   };
 
   useEffect(() => {

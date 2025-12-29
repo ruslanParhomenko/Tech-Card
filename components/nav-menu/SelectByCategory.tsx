@@ -6,6 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { RefreshCcw } from "lucide-react";
 
 export const CATEGORY = [
   {
@@ -59,9 +60,14 @@ export default function SelectByMonthYear({
 
   isLoading?: boolean;
 }) {
-  const classNameSelect = "w-36 h-8! rounded-md  [&>svg]:hidden justify-center";
+  const classNameSelect =
+    "w-36 h-8! rounded-md  [&>svg]:hidden justify-center bg-border";
+
+  const resetParams = () => {
+    setCategory("");
+  };
   return (
-    <div className="flex items-center ">
+    <div className="flex items-center justify-between gap-4">
       <Select
         value={category}
         onValueChange={(value) => setCategory(value)}
@@ -78,6 +84,12 @@ export default function SelectByMonthYear({
           ))}
         </SelectContent>
       </Select>
+      <button
+        onClick={resetParams}
+        className="cursor-pointer w-12  px-2 bg-border rounded-md h-8 flex items-center justify-center"
+      >
+        <RefreshCcw className="w-4 h-4" />
+      </button>
     </div>
   );
 }

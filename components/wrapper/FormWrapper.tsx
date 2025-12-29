@@ -8,12 +8,14 @@ export function FormWrapper({
   children,
   onSubmit,
   className,
+  resetForm,
   ...props
 }: {
   form: UseFormReturn<any>;
   children: React.ReactNode;
   onSubmit?: SubmitHandler<any>;
   className?: string;
+  resetForm?: () => void;
   [key: string]: any;
 }) {
   return (
@@ -21,7 +23,7 @@ export function FormWrapper({
       <form onSubmit={form.handleSubmit(onSubmit || (() => {}))} {...props}>
         <div className={cn(className, "flex flex-col w-full py-8 px-4 ")}>
           {children}
-          <SaveExitButton />
+          <SaveExitButton resetForm={resetForm} />
         </div>
       </form>
     </Form>

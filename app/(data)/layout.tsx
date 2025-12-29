@@ -1,22 +1,28 @@
 import NavMenuHeader from "@/components/nav-menu/NavMenuHeader";
+import NotPermission from "@/components/page/NotPermission";
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
 
 const navItems = [
   { title: "материалы", href: "products" },
   { title: "тех-карты", href: "cards" },
 ];
 
-export default function HomeLayout({
+const ACCESS_ROLE = ["ADMIN", "CUCINA", "MNGR"];
+
+export default async function HomeLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !ACCESS_ROLE.includes(session.user.role || "")) {
+    return <NotPermission />;
+  }
   return (
-    <div className="flex flex-col w-full items-center">
-      <NavMenuHeader
-        navItems={navItems}
-        defaultPatch="products"
-        resetButton={true}
-      />
+    <div className="flex flex-col w-full items-center pt-4">
+      <NavMenuHeader navItems={navItems} defaultPatch="cards" />
       {children}
     </div>
   );

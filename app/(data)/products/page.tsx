@@ -3,7 +3,8 @@ import {
   getProductByCategory,
   ProductsGetData,
 } from "@/app/actions/products/products-actions";
-import { Product } from "@/app/generated/prisma/client";
+import EmptyPage from "@/components/page/EmptyPage";
+import NotData from "@/components/page/NotData";
 import ProductsTable from "@/features/products-table/ProductsTable";
 
 export default async function Page({
@@ -12,10 +13,11 @@ export default async function Page({
   searchParams: Promise<{ categoryProduct: string }>;
 }) {
   const { categoryProduct } = await searchParams;
-  if (!categoryProduct) return null;
+  if (!categoryProduct) return <EmptyPage />;
   const dataProduct =
     categoryProduct === "all"
       ? await getAllProducts()
       : await getProductByCategory(categoryProduct);
+  if (dataProduct.length === 0) return <NotData />;
   return <ProductsTable data={dataProduct as ProductsGetData[]} />;
 }

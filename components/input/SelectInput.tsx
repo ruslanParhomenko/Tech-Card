@@ -43,7 +43,9 @@ export default function SelectInput({
       render={({ field, fieldState }) => (
         <FormItem
           className={cn(
-            orientation === "horizontal" ? "grid-cols-2" : "grid-cols-1 gap-4"
+            orientation === "horizontal"
+              ? "grid-cols-2 gap-2 pb-2"
+              : "grid-cols-1 gap-4"
           )}
         >
           {fieldLabel && <FormLabel>{fieldLabel}</FormLabel>}
@@ -57,14 +59,7 @@ export default function SelectInput({
             disabled={disabled}
           >
             <FormControl className={cn(classNameSelect, "w-full")}>
-              <SelectTrigger
-                data-placeholder=""
-                className={cn(
-                  fieldLabel
-                    ? "w-full"
-                    : "[&_svg]:hidden h-6! border-none bg-transparent shadow-none"
-                )}
-              >
+              <SelectTrigger data-placeholder="">
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
             </FormControl>

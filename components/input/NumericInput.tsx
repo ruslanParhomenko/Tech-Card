@@ -61,7 +61,9 @@ function NumericInput({
 
         return (
           <FormItem
-            className={cn(fieldLabel ? "grid-cols-2" : "grid-cols-1 gap-4")}
+            className={cn(
+              fieldLabel ? "grid-cols-2 gap-2" : "grid-cols-1 gap-4"
+            )}
           >
             {fieldLabel && <FormLabel>{fieldLabel}</FormLabel>}
             <Popover open={open} onOpenChange={setOpen}>
@@ -74,7 +76,7 @@ function NumericInput({
                     disabled={disabled}
                     onClick={() => setOpen(true)}
                     className={cn(
-                      "cursor-pointer text-center h-6",
+                      "cursor-pointer text-center",
                       fieldLabel && "w-12 h-full",
                       className
                     )}

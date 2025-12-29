@@ -2,7 +2,7 @@
 
 import { CalculationCardType } from "@/features/card/schema";
 import prisma from "@/lib/prisma";
-import { unstable_cache } from "next/cache";
+import { unstable_cache, updateTag } from "next/cache";
 
 export type CardsGetData = CalculationCardType;
 
@@ -20,10 +20,19 @@ export async function createCard(data: {
     quantity: string;
     coefficient: string;
     unit: string;
-    productId?: string;
+    nameId: string;
   }[];
 }) {
-  return await prisma.calculationCard.create({
+  const exists = await prisma.calculationCard.findUnique({
+    where: { cardId: data.cardId },
+    select: { id: true },
+  });
+
+  if (exists) {
+    throw new Error("CARD_ID_EXISTS");
+  }
+
+  const card = await prisma.calculationCard.create({
     data: {
       cardId: data.cardId,
       name: data.name,
@@ -40,13 +49,18 @@ export async function createCard(data: {
               quantity: r.quantity,
               coefficient: r.coefficient,
               unit: r.unit,
-              productId: r.productId ? Number(r.productId) : undefined,
+              nameId: r.nameId,
+              productId: Number(r.nameId),
             })),
           }
         : undefined,
     },
     include: { recipe: true },
   });
+
+  updateTag("cards");
+
+  return card.id;
 }
 
 export async function updateCard(
@@ -64,11 +78,12 @@ export async function updateCard(
       quantity: string;
       coefficient: string;
       unit: string;
+      nameId: string;
       productId?: number;
     }[];
   }
 ) {
-  return await prisma.calculationCard.update({
+  const card = await prisma.calculationCard.update({
     where: { id },
     data: {
       name: data.name,
@@ -86,6 +101,10 @@ export async function updateCard(
     },
     include: { recipe: true },
   });
+
+  updateTag("cards");
+
+  return card.id;
 }
 
 // get all
@@ -138,7 +157,9 @@ export const getCardsByCategory = unstable_cache(
 );
 
 export async function deleteCard(id: number) {
-  return await prisma.calculationCard.delete({
+  const card = await prisma.calculationCard.delete({
     where: { id },
   });
+  updateTag("cards");
+  return card.id;
 }

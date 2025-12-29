@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   SubmitHandler,
   useFieldArray,
@@ -36,14 +36,24 @@ import {
 import { ProductType } from "../product/schema";
 import { useLocalStorageForm } from "@/hooks/use-local-storage";
 import { CATEGORY } from "@/components/nav-menu/SelectByCategory";
-import { createCard } from "@/app/actions/cards/cards-action";
+import { createCard, updateCard } from "@/app/actions/cards/cards-action";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import SelectFieldWithSearch from "@/components/input/SelectWithSearch";
+import PrintButton from "@/components/buttons/PrintButton";
 
 export default function CardForm({
   dataProduct,
+  dataCard,
 }: {
   dataProduct: ProductType[];
+  dataCard?: CalculationCardType;
 }) {
+  const router = useRouter();
+  const id = dataCard && dataCard?.id?.toString();
   const STORAGE_KEY = "add-card";
+
+  const componentRef = useRef<HTMLDivElement>(null);
 
   const [dataOptions, setDataOptions] = useState<
     { label: string; value: string }[]
@@ -55,7 +65,7 @@ export default function CardForm({
     mode: "onBlur",
   });
 
-  const { isLoaded } = useLocalStorageForm(form, STORAGE_KEY);
+  const { isLoaded, resetForm } = useLocalStorageForm(form, STORAGE_KEY);
 
   const portion =
     useWatch({
@@ -81,7 +91,7 @@ export default function CardForm({
     let totalNeto_2 = 0;
 
     const values = recipe.map((r) => {
-      const product = dataProduct.find((p) => p.id?.toString() === r.productId);
+      const product = dataProduct.find((p) => p.id?.toString() === r.nameId);
 
       const weight = Number(r.quantity || 0);
       const coefficient = Number(product?.coefficient || 1);
@@ -105,8 +115,31 @@ export default function CardForm({
   }, [recipe, portion, dataProduct]);
 
   const onSubmit: SubmitHandler<CalculationCardType> = async (data) => {
-    console.log("SUBMIT RESULT", data);
-    await createCard(data);
+    try {
+      if (id) {
+        await updateCard(+id, data);
+        toast.success("Продукт успешно обновлен");
+      } else {
+        await createCard(data);
+        toast.success("Продукт успешно создан");
+      }
+
+      resetForm(calculationCardDefaultValues);
+      router.push("/cards");
+    } catch (error) {
+      if (error instanceof Error && error.message === "CARD_ID_EXISTS") {
+        toast.error("Карта с таким номером уже существует");
+
+        form.setError("cardId", {
+          type: "manual",
+          message: "Этот номер карты уже используется",
+        });
+
+        return;
+      }
+
+      toast.error("Ошибка сохранения продукта");
+    }
   };
 
   useEffect(() => {
@@ -120,6 +153,12 @@ export default function CardForm({
     );
   }, [dataProduct]);
 
+  useEffect(() => {
+    if (dataCard) {
+      form.reset(dataCard);
+      RecipeArray.replace(dataCard.recipe);
+    }
+  }, [dataCard]);
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-screen w-full">
@@ -128,185 +167,208 @@ export default function CardForm({
     );
   }
 
+  const reset = () => {
+    resetForm(calculationCardDefaultValues);
+  };
+
   return (
-    <FormWrapper form={form} onSubmit={onSubmit}>
-      <div>
-        <NumericInput fieldLabel="Технологическая карта:" fieldName="cardId" />
+    <FormWrapper form={form} onSubmit={onSubmit} resetForm={reset}>
+      <div ref={componentRef} className="pt-4">
+        <PrintButton componentRef={componentRef} className="" />
+
+        <div className="mb-3">
+          <NumericInput
+            fieldLabel="Технологическая карта:"
+            fieldName="cardId"
+            className="border-0 border-b  font-bold  rounded-none shadow-none h-9"
+          />
+        </div>
 
         <SelectInput
           fieldLabel="Категория продукта:"
           fieldName="category"
           orientation="horizontal"
           options={CATEGORY}
-          classNameSelect="border-0"
+          classNameSelect="border-0 shadow-none border-b rounded-none text-black! h-9!"
         />
 
         <TextInput
           fieldLabel="Наименование продукта:"
           fieldName="name"
           orientation="vertical"
-          classNameInput="h-8! border-0 shadow-none border-b rounded-none"
+          classNameInput="h-9! border-0 shadow-none border-b rounded-none"
         />
 
         <TextInput
           fieldLabel="Срок хранения:"
           fieldName="expirationPeriod"
           orientation="vertical"
-          classNameInput="h-8! border-0 shadow-none border-b rounded-none"
+          classNameInput="h-9! border-0 shadow-none border-b rounded-none"
         />
 
         <TextInput
           fieldLabel="Вес:"
           fieldName="weight"
           orientation="vertical"
-          classNameInput="h-8! border-0 shadow-none border-b rounded-none"
+          classNameInput="h-9! border-0 shadow-none border-b rounded-none"
         />
-      </div>
 
-      <Table className="my-6">
-        <TableHeader>
-          <TableRow>
-            <TableHead colSpan={3}></TableHead>
-            <TableHead colSpan={2} className="text-center">
-              1 порция
-            </TableHead>
-            <TableHead colSpan={2} className="text-center">
-              <div className="flex justify-center items-center gap-3">
-                <NumericInput
-                  fieldName="portion"
-                  className="w-full h-full border-0 shadow-none border-b rounded-none"
-                />
-                порции
-              </div>
-            </TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-
-          <TableRow>
-            <TableHead className="w-10 border-r"></TableHead>
-            <TableHead>продукт</TableHead>
-            <TableHead className="border-x w-16">ед</TableHead>
-            <TableHead className="border-x w-30 text-center">брутто</TableHead>
-            <TableHead className="border-x w-30 text-center">нетто</TableHead>
-            <TableHead className="border-x w-30 text-center">брутто</TableHead>
-            <TableHead className="border-x w-30 text-center">нетто</TableHead>
-            <TableHead className="w-18" />
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {RecipeArray.fields.map((field, idx) => {
-            const { neto, bruto2, neto2, product } =
-              computedValues.values[idx] || {};
-
-            const isLast = idx === RecipeArray.fields.length - 1;
-            const isOnlyOne = RecipeArray.fields.length === 1;
-
-            return (
-              <TableRow key={field.id}>
-                <TableCell className="border-r">{idx + 1}</TableCell>
-
-                <TableCell className="p-0">
-                  <SelectInput
-                    options={dataOptions}
-                    fieldName={`recipe.${idx}.productId`}
-                    onValueChange={(value) => {
-                      const product = dataProduct.find(
-                        (item) => item.id?.toString() === value
-                      );
-
-                      form.setValue(`recipe.${idx}.name`, product?.name ?? "");
-                      form.setValue(`recipe.${idx}.unit`, product?.unit ?? "");
-                    }}
-                  />
-                </TableCell>
-
-                <TableCell className="border-x p-0">
-                  <input
-                    {...form.register(`recipe.${idx}.unit`)}
-                    className="text-center w-full"
-                  />
-                </TableCell>
-
-                <TableCell className="border-x p-0">
+        <Table className="my-6">
+          <TableHeader>
+            <TableRow>
+              <TableHead colSpan={3}></TableHead>
+              <TableHead colSpan={2} className="text-center">
+                1 порция
+              </TableHead>
+              <TableHead colSpan={2} className="text-center">
+                <div className="flex justify-center items-center gap-3">
                   <NumericInput
-                    fieldName={`recipe.${idx}.quantity`}
-                    className="border-0 shadow-none rounded-none w-full"
+                    fieldName="portion"
+                    className="w-full h-full border-0 shadow-none border-b rounded-none"
                   />
-                </TableCell>
+                  порции
+                </div>
+              </TableHead>
+              <TableHead></TableHead>
+            </TableRow>
 
-                <TableCell className="border-x text-center">
-                  {product && neto?.toFixed(4)}
-                </TableCell>
+            <TableRow>
+              <TableHead className="w-10 border-r"></TableHead>
+              <TableHead>продукт</TableHead>
+              <TableHead className="border-x w-16">ед</TableHead>
+              <TableHead className="border-x w-30 text-center">
+                брутто
+              </TableHead>
+              <TableHead className="border-x w-30 text-center">нетто</TableHead>
+              <TableHead className="border-x w-30 text-center">
+                брутто
+              </TableHead>
+              <TableHead className="border-x w-30 text-center">нетто</TableHead>
+              <TableHead className="w-18" />
+            </TableRow>
+          </TableHeader>
 
-                <TableCell className="border-x text-center">
-                  {product && bruto2?.toFixed(4)}
-                </TableCell>
+          <TableBody>
+            {RecipeArray.fields.map((field, idx) => {
+              const { neto, bruto2, neto2, product } =
+                computedValues.values[idx] || {};
 
-                <TableCell className="border-x text-center">
-                  {product && neto2?.toFixed(4)}
-                </TableCell>
+              const isLast = idx === RecipeArray.fields.length - 1;
+              const isOnlyOne = RecipeArray.fields.length === 1;
 
-                <TableCell className="text-end">
-                  <div className="flex justify-between gap-2">
-                    <Trash2Icon
-                      className="cursor-pointer w-4 h-4 text-red-700"
-                      onClick={() =>
-                        isOnlyOne
-                          ? RecipeArray.replace({
-                              productId: "",
+              return (
+                <TableRow key={field.id}>
+                  <TableCell className="border-r">{idx + 1}</TableCell>
+
+                  <TableCell className="py-0">
+                    <SelectFieldWithSearch
+                      options={dataOptions}
+                      fieldName={`recipe.${idx}.nameId`}
+                      onValueChange={(value) => {
+                        const product = dataProduct.find(
+                          (item) => item.id?.toString() === value
+                        );
+
+                        form.setValue(
+                          `recipe.${idx}.name`,
+                          product?.name ?? ""
+                        );
+                        form.setValue(
+                          `recipe.${idx}.unit`,
+                          product?.unit ?? ""
+                        );
+                      }}
+                      className="border-0"
+                    />
+                  </TableCell>
+
+                  <TableCell className="border-x p-0">
+                    <input
+                      {...form.register(`recipe.${idx}.unit`)}
+                      className="text-center w-full"
+                    />
+                  </TableCell>
+
+                  <TableCell className="border-x p-0">
+                    <NumericInput
+                      fieldName={`recipe.${idx}.quantity`}
+                      className="border-0 shadow-none rounded-none w-full h-8"
+                    />
+                  </TableCell>
+
+                  <TableCell className="border-x text-center">
+                    {product && neto?.toFixed(4)}
+                  </TableCell>
+
+                  <TableCell className="border-x text-center">
+                    {product && bruto2?.toFixed(4)}
+                  </TableCell>
+
+                  <TableCell className="border-x text-center">
+                    {product && neto2?.toFixed(4)}
+                  </TableCell>
+
+                  <TableCell className="text-end print:hidden">
+                    <div className="flex justify-between gap-2">
+                      <Trash2Icon
+                        className="cursor-pointer w-4 h-4 text-red-700"
+                        onClick={() =>
+                          isOnlyOne
+                            ? RecipeArray.replace({
+                                nameId: "",
+                                name: "",
+                                unit: "",
+                                quantity: "",
+                                coefficient: "1",
+                              })
+                            : RecipeArray.remove(idx)
+                        }
+                      />
+
+                      {isLast && (
+                        <PlusIcon
+                          className="cursor-pointer w-4 h-4 text-green-700"
+                          onClick={() =>
+                            RecipeArray.append({
+                              nameId: "",
                               name: "",
                               unit: "",
                               quantity: "",
                               coefficient: "1",
                             })
-                          : RecipeArray.remove(idx)
-                      }
-                    />
+                          }
+                        />
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
 
-                    {isLast && (
-                      <PlusIcon
-                        className="cursor-pointer w-4 h-4 text-green-700"
-                        onClick={() =>
-                          RecipeArray.append({
-                            productId: "",
-                            name: "",
-                            unit: "",
-                            quantity: "",
-                            coefficient: "1",
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+            <TableRow className="font-semibold">
+              <TableCell colSpan={3}>Итого, кг</TableCell>
+              <TableCell className="text-center">
+                {computedValues.totals.totalBruto.toFixed(2)}
+              </TableCell>
+              <TableCell className="text-center">
+                {computedValues.totals.totalNeto.toFixed(2)}
+              </TableCell>
+              <TableCell className="text-center">
+                {computedValues.totals.totalBruto_2.toFixed(2)}
+              </TableCell>
+              <TableCell className="text-center">
+                {computedValues.totals.totalNeto_2.toFixed(2)}
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
 
-          <TableRow className="font-semibold">
-            <TableCell colSpan={3}>Итого, кг</TableCell>
-            <TableCell className="text-center">
-              {computedValues.totals.totalBruto.toFixed(2)}
-            </TableCell>
-            <TableCell className="text-center">
-              {computedValues.totals.totalNeto.toFixed(2)}
-            </TableCell>
-            <TableCell className="text-center">
-              {computedValues.totals.totalBruto_2.toFixed(2)}
-            </TableCell>
-            <TableCell className="text-center">
-              {computedValues.totals.totalNeto_2.toFixed(2)}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-
-      <Label className="my-3">Технология приготовления:</Label>
-      <Textarea
-        className="my-4 resize-none"
-        {...form.register("description")}
-      />
+        <Label className="my-3">Технология приготовления:</Label>
+        <Textarea
+          className="my-4 resize-none"
+          {...form.register("description")}
+        />
+      </div>
     </FormWrapper>
   );
 }

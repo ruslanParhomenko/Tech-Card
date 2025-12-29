@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const recipeItemSchema = z.object({
+  id: z.number().optional(),
   name: z.string().default(""),
   quantity: z
     .string()
@@ -11,7 +12,8 @@ export const recipeItemSchema = z.object({
     .regex(/^\d+(\.\d+)?$/, "Коэффициент должен содержать только цифры и точку")
     .default("1"),
   unit: z.string().default(""),
-  productId: z.string().default(""),
+  nameId: z.string().default(""),
+  productId: z.number().optional(),
 });
 
 export const recipeItemDefaultValues = {
@@ -19,10 +21,11 @@ export const recipeItemDefaultValues = {
   quantity: "0",
   coefficient: "1",
   unit: "",
-  productId: "",
+  nameId: "",
 };
 
 export const calculationCardSchema = z.object({
+  id: z.number().optional(),
   portion: z.string().optional().default("1"),
   cardId: z
     .string()
@@ -62,7 +65,7 @@ export const calculationCardDefaultValues = {
       quantity: "",
       coefficient: "1",
       unit: "",
-      productId: "",
+      nameId: "",
     },
   ],
 };

@@ -40,7 +40,7 @@ export default function TextInput({
           className={cn(
             orientation === "horizontal"
               ? "grid-cols-1 gap-4"
-              : "grid-cols-2 items-end gap-2"
+              : "grid-cols-2  gap-2"
           )}
         >
           <FormLabel>{fieldLabel}</FormLabel>

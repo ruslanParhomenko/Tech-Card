@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Table,
   TableBody,
@@ -9,33 +7,33 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import ActionButton from "../../components/buttons/ActionButton";
+import { deleteCard } from "@/app/actions/cards/cards-action";
+import { ViewTransition } from "react";
+import { CalculationCardType } from "../card/schema";
 
-export default function ProductsTable({ data }: { data: any }) {
+export default function ProductsTable({
+  data,
+}: {
+  data: CalculationCardType[];
+}) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-12.5">№</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Weight</TableHead>
-          <TableHead>Card ID</TableHead>
-          <TableHead>Created</TableHead>
-        </TableRow>
-      </TableHeader>
-
-      <TableBody>
-        {data?.length === 0 ? (
+    <ViewTransition>
+      <Table>
+        <TableHeader>
           <TableRow>
-            <TableCell
-              colSpan={6}
-              className="text-center text-muted-foreground"
-            >
-              Нет данных
-            </TableCell>
+            <TableHead />
+            <TableHead>карты</TableHead>
+            <TableHead>категория</TableHead>
+            <TableHead>выход</TableHead>
+            <TableHead>id</TableHead>
+            <TableHead />
+            <TableHead />
           </TableRow>
-        ) : (
-          data?.map((item: any, index: number) => (
+        </TableHeader>
+
+        <TableBody>
+          {data?.map((item: any, index: number) => (
             <TableRow key={item.id}>
               <TableCell>{index + 1}</TableCell>
               <TableCell className="font-medium">{item.name}</TableCell>
@@ -43,12 +41,19 @@ export default function ProductsTable({ data }: { data: any }) {
               <TableCell>{item.weight}</TableCell>
               <TableCell>{item.cardId}</TableCell>
               <TableCell>
-                {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}
+                {format(new Date(item.createdAt), "dd.MM.yyyy")}
+              </TableCell>
+              <TableCell>
+                <ActionButton
+                  id={item.id}
+                  mainTag="card"
+                  handleDelete={deleteCard}
+                />
               </TableCell>
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
+          ))}
+        </TableBody>
+      </Table>
+    </ViewTransition>
   );
 }

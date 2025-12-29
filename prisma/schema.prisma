@@ -45,11 +45,12 @@ model RecipeItem {
   quantity    String
   coefficient String
   unit        String
+  nameId      String
 
   cardId    Int
   productId Int?
 
-  card CalculationCard @relation(fields: [cardId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  card CalculationCard @relation(fields: [cardId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   product Product? @relation(fields: [productId], references: [id], onUpdate: Cascade, onDelete: SetNull)
 }
