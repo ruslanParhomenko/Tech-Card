@@ -64,7 +64,7 @@ export default function NavMenuHeader({
   };
 
   return (
-    <div className="pb-4 mb-4 px-4 sticky top-4 z-10 flex justify-between w-full">
+    <div className="px-4 sticky top-2 z-10 flex justify-between w-full">
       {navItems.length > 0 && (
         <SelectTabsByPatch
           patch={patch}

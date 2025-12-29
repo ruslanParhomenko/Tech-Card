@@ -1,7 +1,7 @@
 "use client";
 
 import ModalConfirm from "@/components/modal/ModalConfirm";
-import { PenBoxIcon, Trash2Icon } from "lucide-react";
+import { Eye, PenBoxIcon, Trash2Icon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,6 +23,9 @@ export default function ActionButton({
     setOpen(false);
     handleDelete && handleDelete(id);
   };
+  const handleView = () => {
+    router.push(`/${mainTag}-view/${id}`);
+  };
 
   const isDisabled = session?.user?.role !== "ADMIN";
   return (
@@ -33,7 +36,10 @@ export default function ActionButton({
         handleConfirm={handleConfirm}
         message="удалить"
       />
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-3">
+        <button className="cursor-pointer" onClick={() => handleView()}>
+          <Eye className="w-5 h-5 text-green-700 cursor-pointer" />
+        </button>
         <button
           disabled={isDisabled}
           className="cursor-pointer"

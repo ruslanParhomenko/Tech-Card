@@ -9,6 +9,7 @@ export function FormWrapper({
   onSubmit,
   className,
   resetForm,
+  disabled = false,
   ...props
 }: {
   form: UseFormReturn<any>;
@@ -17,13 +18,14 @@ export function FormWrapper({
   className?: string;
   resetForm?: () => void;
   [key: string]: any;
+  disabled?: boolean;
 }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit || (() => {}))} {...props}>
         <div className={cn(className, "flex flex-col w-full py-8 px-4 ")}>
           {children}
-          <SaveExitButton resetForm={resetForm} />
+          <SaveExitButton resetForm={resetForm} disabled={disabled} />
         </div>
       </form>
     </Form>

@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 
 export default function SaveExitButton({
   resetForm,
+  disabled = false,
 }: {
   resetForm?: () => void;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const exit = () => router.back();
@@ -15,7 +17,7 @@ export default function SaveExitButton({
       <Button
         type="button"
         variant="ghost"
-        className="w-24 cursor-pointer"
+        className={cn("w-24 cursor-pointer", disabled && "hidden")}
         onClick={() => resetForm && resetForm()}
       >
         очистить
@@ -28,7 +30,10 @@ export default function SaveExitButton({
       >
         выйти
       </Button>
-      <Button type="submit" className="w-24 cursor-pointer">
+      <Button
+        type="submit"
+        className={cn("w-24 cursor-pointer", disabled && "hidden")}
+      >
         сохранить
       </Button>
     </div>

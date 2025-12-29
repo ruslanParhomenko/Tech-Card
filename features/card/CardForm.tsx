@@ -41,13 +41,16 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import SelectFieldWithSearch from "@/components/input/SelectWithSearch";
 import PrintButton from "@/components/buttons/PrintButton";
+import { cn } from "@/lib/utils";
 
 export default function CardForm({
   dataProduct,
   dataCard,
+  disabled = false,
 }: {
   dataProduct: ProductType[];
   dataCard?: CalculationCardType;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const id = dataCard && dataCard?.id?.toString();
@@ -172,8 +175,13 @@ export default function CardForm({
   };
 
   return (
-    <FormWrapper form={form} onSubmit={onSubmit} resetForm={reset}>
-      <div ref={componentRef} className="pt-4">
+    <FormWrapper
+      form={form}
+      onSubmit={onSubmit}
+      resetForm={reset}
+      disabled={disabled}
+    >
+      <div ref={componentRef}>
         <PrintButton componentRef={componentRef} className="" />
 
         <div className="mb-3">
@@ -181,6 +189,7 @@ export default function CardForm({
             fieldLabel="Технологическая карта:"
             fieldName="cardId"
             className="border-0 border-b  font-bold  rounded-none shadow-none h-9"
+            disabled={disabled}
           />
         </div>
 
@@ -190,6 +199,7 @@ export default function CardForm({
           orientation="horizontal"
           options={CATEGORY}
           classNameSelect="border-0 shadow-none border-b rounded-none text-black! h-9!"
+          disabled={disabled}
         />
 
         <TextInput
@@ -197,6 +207,7 @@ export default function CardForm({
           fieldName="name"
           orientation="vertical"
           classNameInput="h-9! border-0 shadow-none border-b rounded-none"
+          disabled={disabled}
         />
 
         <TextInput
@@ -204,6 +215,7 @@ export default function CardForm({
           fieldName="expirationPeriod"
           orientation="vertical"
           classNameInput="h-9! border-0 shadow-none border-b rounded-none"
+          disabled={disabled}
         />
 
         <TextInput
@@ -211,9 +223,10 @@ export default function CardForm({
           fieldName="weight"
           orientation="vertical"
           classNameInput="h-9! border-0 shadow-none border-b rounded-none"
+          disabled={disabled}
         />
 
-        <Table className="my-6">
+        <Table className="my-4">
           <TableHeader>
             <TableRow>
               <TableHead colSpan={3}></TableHead>
@@ -225,6 +238,7 @@ export default function CardForm({
                   <NumericInput
                     fieldName="portion"
                     className="w-full h-full border-0 shadow-none border-b rounded-none"
+                    disabled={disabled}
                   />
                   порции
                 </div>
@@ -279,6 +293,7 @@ export default function CardForm({
                         );
                       }}
                       className="border-0"
+                      disabled={disabled}
                     />
                   </TableCell>
 
@@ -286,6 +301,7 @@ export default function CardForm({
                     <input
                       {...form.register(`recipe.${idx}.unit`)}
                       className="text-center w-full"
+                      disabled={disabled}
                     />
                   </TableCell>
 
@@ -293,6 +309,7 @@ export default function CardForm({
                     <NumericInput
                       fieldName={`recipe.${idx}.quantity`}
                       className="border-0 shadow-none rounded-none w-full h-8"
+                      disabled={disabled}
                     />
                   </TableCell>
 
@@ -308,7 +325,12 @@ export default function CardForm({
                     {product && neto2?.toFixed(4)}
                   </TableCell>
 
-                  <TableCell className="text-end print:hidden">
+                  <TableCell
+                    className={cn(
+                      "text-end print:hidden",
+                      disabled && "hidden"
+                    )}
+                  >
                     <div className="flex justify-between gap-2">
                       <Trash2Icon
                         className="cursor-pointer w-4 h-4 text-red-700"
