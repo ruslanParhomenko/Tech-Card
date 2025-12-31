@@ -95,7 +95,7 @@ export default function NavMenuHeader({
       <div className="flex items-center">
         <button
           onClick={addNew}
-          className="cursor-pointer md:w-12 w-8 px-2 bg-blue-500 border-0 rounded-md h-7 flex items-center justify-center"
+          className="cursor-pointer md:w-12 w-8 px-2 bg-blue-500 border-0 rounded-md h-8 flex items-center justify-center"
         >
           <Plus className="w-5 h-5 text-white" />
         </button>

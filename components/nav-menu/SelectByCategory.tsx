@@ -61,7 +61,7 @@ export default function SelectByMonthYear({
   isLoading?: boolean;
 }) {
   const classNameSelect =
-    "md:w-36 w-22 h-8! rounded-md  [&>svg]:hidden justify-center bg-border/30 border-0 items-center";
+    "md:w-36 w-22 h-8! rounded-md  [&>svg]:hidden justify-center bg-black border-0 items-center";
 
   const resetParams = () => {
     setCategory("");
@@ -73,13 +73,13 @@ export default function SelectByMonthYear({
         onValueChange={(value) => setCategory(value)}
         disabled={isLoading}
       >
-        <SelectTrigger className={cn(classNameSelect)}>
+        <SelectTrigger className={cn(classNameSelect, "text-white!")}>
           <SelectValue placeholder="category" />
         </SelectTrigger>
         <SelectContent>
           {options.map((category) => (
             <SelectItem key={category.value} value={category.value}>
-              <span className="truncate block w-full font-bold">
+              <span className="truncate block  font-bold w-36">
                 {category.label}
               </span>
             </SelectItem>
@@ -88,9 +88,9 @@ export default function SelectByMonthYear({
       </Select>
       <button
         onClick={resetParams}
-        className="cursor-pointer md:w-12 w-8  px-2 bg-border/30 border-0 rounded-md h-8 flex items-center justify-center"
+        className="cursor-pointer md:w-12 w-8  px-2 bg-black border-0 rounded-md h-8 flex items-center justify-center"
       >
-        <RefreshCcw className="w-4 h-4" />
+        <RefreshCcw className="w-4 h-4 text-white" />
       </button>
     </div>
   );

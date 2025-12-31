@@ -1,7 +1,7 @@
 "use client";
 
 import ModalConfirm from "@/components/modal/ModalConfirm";
-import { Eye, PenBoxIcon, Trash2Icon } from "lucide-react";
+import { Eye, PenBoxIcon, Trash2Icon, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -36,7 +36,7 @@ export default function ActionButton({
         handleConfirm={handleConfirm}
         message="удалить"
       />
-      <div className="flex justify-between gap-3">
+      <div className="flex justify-between gap-6 w-full">
         <button className="cursor-pointer" onClick={() => handleView()}>
           <Eye className="w-5 h-5 text-green-700 cursor-pointer" />
         </button>
@@ -52,7 +52,7 @@ export default function ActionButton({
           className="cursor-pointer"
           onClick={() => !isDisabled && setOpen(true)}
         >
-          <Trash2Icon className="h-4 w-4 text-red-700" />
+          <TrashIcon className="h-4 w-4 text-red-700" />
         </button>
       </div>
     </>
