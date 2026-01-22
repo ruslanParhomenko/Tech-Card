@@ -1,25 +1,21 @@
 "use server";
 
 import { dbAdmin } from "@/lib/firebase-admin";
-import { unstable_cache } from "next/cache";
+import { redis } from "@/lib/redis";
 
-type UserData = {
-  id: string;
-  mail: string;
-  role: string;
-};
+const USERS_KEY = "users";
 
-// get
+export async function getEmployees() {
+  const cached = await redis.get(USERS_KEY);
+  if (cached) return cached;
 
-export const _getUsers = async () => {
-  const snapshot = await dbAdmin.collection("users").get();
-  return snapshot.docs.map((doc: any) => ({
+  const snapshot = await dbAdmin.collection(USERS_KEY).get();
+  const employees = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  })) as UserData[];
-};
+  }));
 
-export const getUsers = unstable_cache(_getUsers, ["users"], {
-  revalidate: false,
-  tags: ["users"],
-});
+  await redis.set(USERS_KEY, employees);
+
+  return employees;
+}
