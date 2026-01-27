@@ -30,8 +30,9 @@ export default async function HomeLayout({
     );
   }
   return (
-    <NavMenuHeader navItems={navItems} defaultPatch="cards">
-      {children}
-    </NavMenuHeader>
+    <div className="flex flex-col h-screen">
+      <div className="flex-1">{children}</div>
+      <NavMenuHeader navItems={navItems} defaultPatch="cards" />
+    </div>
   );
 }

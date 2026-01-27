@@ -13,12 +13,10 @@ export type PageNavType = {
 };
 
 export default function NavMenuHeader({
-  children,
   navItems,
   defaultPatch = "cards",
   classNamePatch,
 }: {
-  children: React.ReactNode;
   navItems: PageNavType[];
   defaultPatch?: string;
   classNamePatch?: string;
@@ -31,8 +29,8 @@ export default function NavMenuHeader({
   const searchParams = useSearchParams();
 
   const initialPatch = pathname?.split("/")[1] || defaultPatch;
-  const initialCategory = searchParams.get("category") || "all";
-  const initialCategoryProduct = searchParams.get("categoryProduct") || "all";
+  const initialCategory = searchParams.get("category") ?? "all";
+  const initialCategoryProduct = searchParams.get("categoryProduct") ?? "all";
 
   const [patch, setPatch] = useState(initialPatch);
   const [category, setCategory] = useState(initialCategory);
@@ -70,58 +68,48 @@ export default function NavMenuHeader({
   };
 
   return (
-    <div className="flex flex-col  items-center h-screen">
-      <div className="p-2 md:px-6  sticky top-1 z-10 flex justify-end gap-6 w-full">
-        <div className="flex justify-center items-center">
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="bg-black p-1 rounded-md h-6 w-12"
-          >
-            <LogOut className="w-4 h-4 text-white font-bold" />
-          </button>
-        </div>
+    <div className="px-2  pb-2   bg-background  sticky bottom-0 z-12 flex justify-between  md:gap-8">
+      <button
+        onClick={() => signOut({ callbackUrl: "/" })}
+        className="cursor-pointer w-10 px-2 bg-black border-0 rounded-md h-8 md:h-9 flex items-center justify-center"
+      >
+        <LogOut className="w-4 h-4 text-white" />
+      </button>
+      {navItems.length > 0 && (
+        <SelectTabsByPatch
+          patch={patch}
+          setPatch={handlePatchChange}
+          isPending={isPending}
+          navItems={navItems}
+          classNamePatch={classNamePatch}
+        />
+      )}
 
-        {isAdmin && (
-          <div className="flex items-center">
-            <button
-              onClick={addNew}
-              className="cursor-pointer w-12 px-2 bg-blue-500 border-0 rounded-md h-6 flex items-center justify-center"
-            >
-              <Plus className="w-5 h-5 text-white" />
-            </button>
-          </div>
-        )}
-      </div>
-      <div className="flex-1 overflow-auto">{children}</div>
-      <div className="px-2 md:px-6 pb-2 mt-2  sticky bottom-1 z-10 flex justify-between md:justify-start md:gap-6 w-full">
-        {navItems.length > 0 && (
-          <SelectTabsByPatch
-            patch={patch}
-            setPatch={handlePatchChange}
-            isPending={isPending}
-            navItems={navItems}
-            classNamePatch={classNamePatch}
-          />
-        )}
+      {patch === "cards" && (
+        <SelectByCategory
+          options={[{ value: "all", label: "все" }, ...CATEGORY]}
+          category={category}
+          setCategory={handleCategoryChange}
+          isLoading={isPending}
+        />
+      )}
 
-        {patch === "cards" && (
-          <SelectByCategory
-            options={[{ value: "all", label: "все" }, ...CATEGORY]}
-            category={category}
-            setCategory={handleCategoryChange}
-            isLoading={isPending}
-          />
-        )}
-
-        {patch === "products" && (
-          <SelectByCategory
-            options={[{ value: "all", label: "все" }, ...CATEGORY_PRODUCT]}
-            category={categoryProduct}
-            setCategory={handleCategoryProductChange}
-            isLoading={isPending}
-          />
-        )}
-      </div>
+      {patch === "products" && (
+        <SelectByCategory
+          options={[{ value: "all", label: "все" }, ...CATEGORY_PRODUCT]}
+          category={categoryProduct}
+          setCategory={handleCategoryProductChange}
+          isLoading={isPending}
+        />
+      )}
+      {isAdmin && (
+        <button
+          onClick={addNew}
+          className="cursor-pointer w-10 px-2 bg-blue-500 border-0 rounded-md h-8 md:h-9 flex items-center justify-center"
+        >
+          <Plus className="w-4 h-4 text-white" />
+        </button>
+      )}
     </div>
   );
 }

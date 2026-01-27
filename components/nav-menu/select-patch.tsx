@@ -17,7 +17,7 @@ export default function SelectTabsByPatch({
 }) {
   return (
     <Tabs value={patch} onValueChange={(value) => setPatch(value)}>
-      <TabsList className="flex gap-2 h-8 md:h-10">
+      <TabsList className="flex gap-2 h-8 md:h-9">
         {navItems.map((page) => (
           <TabsTrigger
             key={page.title}

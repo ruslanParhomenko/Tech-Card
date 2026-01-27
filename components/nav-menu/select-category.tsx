@@ -61,37 +61,29 @@ export default function SelectByMonthYear({
   isLoading?: boolean;
 }) {
   const classNameSelect =
-    "md:w-38 w-28 md:h-10! h-8! rounded-md  [&>svg]:hidden justify-center bg-black border-0 items-center";
+    "md:w-38 w-28 md:h-9! h-8! rounded-md  [&>svg]:hidden justify-center bg-black border-0 items-center";
 
   const resetParams = () => {
     setCategory("");
   };
   return (
-    <div className="flex items-center justify-between gap-4">
-      <Select
-        value={category}
-        onValueChange={(value) => setCategory(value)}
-        disabled={isLoading}
-      >
-        <SelectTrigger className={cn(classNameSelect, "text-white! p-1")}>
-          <SelectValue placeholder="категория" />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((category) => (
-            <SelectItem key={category.value} value={category.value}>
-              <span className="truncate block  font-bold w-36">
-                {category.label}
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <button
-        onClick={resetParams}
-        className="cursor-pointer md:w-14 w-12  px-2 bg-black border-0 rounded-md h-8 md:h-10 flex items-center justify-center"
-      >
-        <RefreshCcw className="w-4 h-4  text-white" />
-      </button>
-    </div>
+    <Select
+      value={category}
+      onValueChange={(value) => setCategory(value)}
+      disabled={isLoading}
+    >
+      <SelectTrigger className={cn(classNameSelect, "text-white! p-1")}>
+        <SelectValue placeholder="категория" />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((category) => (
+          <SelectItem key={category.value} value={category.value}>
+            <span className="truncate block  font-bold w-36">
+              {category.label}
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
