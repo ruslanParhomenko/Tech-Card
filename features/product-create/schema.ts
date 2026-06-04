@@ -39,7 +39,9 @@ export const productSchema = z.object({
     ),
   unit: unitEnum,
   category: categoryEnum,
-  id: z.string().regex(/^\d+$/, "Ключ должен содержать только цифры"),
+  id: z
+    .string()
+    .regex(/^[0-9.]+$/, "Ключ должен содержать только цифры и точку"),
 });
 
 export type ProductType = z.infer<typeof productSchema>;
